@@ -1,4 +1,8 @@
-# servedir
+# Command servedir
+
+![CI](https://github.com/foxygoat/servedir/workflows/ci/badge.svg?branch=master)
+[![Godoc](https://img.shields.io/badge/godoc-ref-blue)](https://pkg.go.dev/foxygo.at/servedir)
+[![Slack chat](https://img.shields.io/badge/slack-gophers-795679?logo=slack)](https://gophers.slack.com/messages/foxygoat)
 
 Simple HTTP server inspired by `python -mSimpleHTTPServer`.
 
