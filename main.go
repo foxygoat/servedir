@@ -1,5 +1,17 @@
-// servedir command start http server, serving files in current directory
-//       go get foxygo.at/servedir
+// The servedir command starts an HTTP server, serving files from either
+// the current directory or a specified directory, on the next free
+// ephemeral port or a specified port.
+//
+//     go get foxygo.at/servedir
+//     servedir --help
+//     usage: servedir [-a] [-p <port>] [<dir>]
+//
+//     Simple HTTP server, serving files from given directory.
+//
+//       -a	listen on all interfaces not just localhost
+//       -p int
+//            port number (default: os chosen free port)
+//       <dir> defaults to current directory if not specified
 package main
 
 import (
