@@ -10,8 +10,17 @@ Serves files from given directory on specified or next free port.
 
 Install and run with
 
-    > go get foxygo.at/servedir
+    > go install foxygo.at/servedir@latest
     > servedir
     Starting HTTP server at http://localhost:52537
 
 There are options for port, listen interface and directory, see `servedir --help`.
+
+## Development
+
+Tooling is bootstrapped with [Hermit], activate it with
+`. ./bin/activate-hermit`. Run `make` to view help available make
+targets.
+
+[Hermit]: 
+https://cashapp.github.io/hermit/

@@ -21,6 +21,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func usage() {
@@ -45,7 +46,11 @@ func listenAddr(port int, allInterfaces bool) string {
 	return fmt.Sprintf("127.0.0.1:%d", port)
 }
 
-func listenAddrURL(addr *net.TCPAddr) string {
+func listenAddrURL(address net.Addr) string {
+	addr, ok := address.(*net.TCPAddr)
+	if !ok {
+		return "<unknown address>"
+	}
 	if addr.IP.IsLoopback() {
 		return fmt.Sprintf("http://localhost:%d", addr.Port)
 	}
@@ -80,8 +85,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	server := newServer(cfg.dir)
+	fmt.Printf("Starting HTTP server on %s\n", listenAddrURL(listener.Addr()))
+	log.Fatal(server.Serve(listener))
+}
 
-	addr := listener.Addr().(*net.TCPAddr)
-	fmt.Printf("Starting HTTP server on %s\n", listenAddrURL(addr))
-	log.Fatal(http.Serve(listener, nil))
+func newServer(dir string) *http.Server {
+	fileServer := http.FileServer(http.Dir(dir))
+	h := func(resp http.ResponseWriter, req *http.Request) {
+		resp.Header().Add("Cache-Control", "no-cache")
+		if strings.HasSuffix(req.URL.Path, ".wasm") {
+			resp.Header().Set("content-type", "application/wasm")
+		}
+		fileServer.ServeHTTP(resp, req)
+	}
+	return &http.Server{Handler: http.HandlerFunc(h)}
 }
