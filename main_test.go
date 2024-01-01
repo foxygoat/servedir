@@ -61,3 +61,14 @@ func TestParseFlags(t *testing.T) {
 	got := parseFlags()
 	require.Equal(t, want, got)
 }
+
+func TestParseFlagsFromEnvironment(t *testing.T) {
+	want := config{
+		listenAddr: ":1",
+		dir:        ".",
+	}
+	t.Setenv("SERVEDIR_ALL_INTERFACES", "true")
+	t.Setenv("SERVEDIR_PORT", "1")
+	got := parseFlags()
+	require.Equal(t, want, got)
+}

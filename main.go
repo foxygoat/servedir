@@ -7,9 +7,9 @@
 //
 //	Simple HTTP server, serving files from given directory.
 //
-//	  -a	listen on all interfaces not just localhost
+//	  -a	listen on all interfaces not just localhost (env: SERVEDIR_ALL_INTERFACES)
 //	  -p int
-//	        port number (default: os chosen free port)
+//	        port number (default: os chosen free port) (env: SERVEDIR_PORT)
 //	  <dir> defaults to current directory if not specified
 package main
 
@@ -20,6 +20,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -67,9 +68,23 @@ type config struct {
 }
 
 func parseFlags(args ...string) config {
+	var portDefault int = 0
+	if s, ok := os.LookupEnv("SERVEDIR_PORT"); ok {
+		if v, err := strconv.ParseInt(s, 0, strconv.IntSize); err == nil {
+			portDefault = int(v)
+		}
+	}
+
+	var allInterfacesDefault bool = false
+	if s, ok := os.LookupEnv("SERVEDIR_ALL_INTERFACES"); ok {
+		if v, err := strconv.ParseBool(s); err == nil {
+			allInterfacesDefault = v
+		}
+	}
+
 	fs := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	port := fs.Int("p", 0, "port number (default: os chosen free port)")
-	allInterfaces := fs.Bool("a", false, "listen on all interfaces not just localhost")
+	port := fs.Int("p", portDefault, "port number (default: os chosen free port)")
+	allInterfaces := fs.Bool("a", allInterfacesDefault, "listen on all interfaces not just localhost")
 	fs.Usage = func() { usage(fs) }
 	fs.Parse(args) //nolint:errcheck // ExitOnError means this does not return an error
 	return config{
