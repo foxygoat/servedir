@@ -12,8 +12,9 @@ import (
 
 func TestUsage(t *testing.T) {
 	w := bytes.NewBuffer(nil)
-	flag.CommandLine.SetOutput(w)
-	usage()
+	fs := flag.NewFlagSet("servedir", flag.ExitOnError)
+	fs.SetOutput(w)
+	usage(fs)
 	opts := `[-a] [-p <port>] [<dir>]`
 	desc := `Simple HTTP server, serving files from given directory.`
 	require.Contains(t, w.String(), opts)

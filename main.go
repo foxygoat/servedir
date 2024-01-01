@@ -2,16 +2,15 @@
 // the current directory or a specified directory, on the next free
 // ephemeral port or a specified port.
 //
-//     go get foxygo.at/servedir
-//     servedir --help
-//     usage: servedir [-a] [-p <port>] [<dir>]
+//	go run foxygo.at/servedir@latest --help
+//	usage: servedir [-a] [-p <port>] [<dir>]
 //
-//     Simple HTTP server, serving files from given directory.
+//	Simple HTTP server, serving files from given directory.
 //
-//       -a	listen on all interfaces not just localhost
-//       -p int
-//            port number (default: os chosen free port)
-//       <dir> defaults to current directory if not specified
+//	  -a	listen on all interfaces not just localhost
+//	  -p int
+//	        port number (default: os chosen free port)
+//	  <dir> defaults to current directory if not specified
 package main
 
 import (
@@ -24,11 +23,11 @@ import (
 	"strings"
 )
 
-func usage() {
-	w := flag.CommandLine.Output()
+func usage(fs *flag.FlagSet) {
+	w := fs.Output()
 	fmt.Fprintf(w, "usage: %s [-a] [-p <port>] [<dir>]\n\n", os.Args[0])
 	fmt.Fprintf(w, "Simple HTTP server, serving files from given directory.\n\n")
-	flag.PrintDefaults()
+	fs.PrintDefaults()
 	fmt.Fprintf(w, "  <dir> defaults to current directory if not specified\n")
 }
 
@@ -67,19 +66,20 @@ type config struct {
 	listenAddr string
 }
 
-func parseFlags() config {
-	port := flag.Int("p", 0, "port number (default: os chosen free port)")
-	allInterfaces := flag.Bool("a", false, "listen on all interfaces not just localhost")
-	flag.Usage = usage
-	flag.Parse()
+func parseFlags(args ...string) config {
+	fs := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	port := fs.Int("p", 0, "port number (default: os chosen free port)")
+	allInterfaces := fs.Bool("a", false, "listen on all interfaces not just localhost")
+	fs.Usage = func() { usage(fs) }
+	fs.Parse(args) //nolint:errcheck // ExitOnError means this does not return an error
 	return config{
-		dir:        dir(flag.Args()),
+		dir:        dir(fs.Args()),
 		listenAddr: listenAddr(*port, *allInterfaces),
 	}
 }
 
 func main() {
-	cfg := parseFlags()
+	cfg := parseFlags(os.Args[1:]...)
 	http.Handle("/", http.FileServer(http.Dir(cfg.dir)))
 	listener, err := net.Listen("tcp", cfg.listenAddr)
 	if err != nil {
