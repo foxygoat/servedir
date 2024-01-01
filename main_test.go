@@ -12,8 +12,9 @@ import (
 
 func TestUsage(t *testing.T) {
 	w := bytes.NewBuffer(nil)
-	flag.CommandLine.SetOutput(w)
-	usage()
+	fs := flag.NewFlagSet("servedir", flag.ExitOnError)
+	fs.SetOutput(w)
+	usage(fs)
 	opts := `[-a] [-p <port>] [<dir>]`
 	desc := `Simple HTTP server, serving files from given directory.`
 	require.Contains(t, w.String(), opts)
@@ -57,6 +58,17 @@ func TestParseFlags(t *testing.T) {
 		listenAddr: "127.0.0.1:0",
 		dir:        ".",
 	}
+	got := parseFlags()
+	require.Equal(t, want, got)
+}
+
+func TestParseFlagsFromEnvironment(t *testing.T) {
+	want := config{
+		listenAddr: ":1",
+		dir:        ".",
+	}
+	t.Setenv("SERVEDIR_ALL_INTERFACES", "true")
+	t.Setenv("SERVEDIR_PORT", "1")
 	got := parseFlags()
 	require.Equal(t, want, got)
 }
